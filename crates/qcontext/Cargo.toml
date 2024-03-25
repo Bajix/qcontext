@@ -2,7 +2,7 @@
 authors = ["Thomas Sieverding <Thomas@bajix.com>"]
 edition = "2021"
 name = "qcontext"
-version = "0.3.0"
+version = "0.4.0"
 description = "One-time initializable static state with statically-checked zero-cost interior mutability"
 readme = "../../README.md"
 license = "MIT"
@@ -10,4 +10,4 @@ repository = "https://github.com/Bajix/qcontext/"
 
 [dependencies]
 qcell = "0.5"
-qcontext-derive = { version = "0.3.0", path = "../qcontext-derive" }
+qcontext-derive = { version = "0.4.0", path = "../qcontext-derive" }

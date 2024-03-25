@@ -1,12 +1,12 @@
 use darling::FromDeriveInput;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, Ident, Path};
+use syn::{parse_macro_input, DeriveInput, Ident, Type};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(context))]
 struct ContextDeriveInput {
   ident: Ident,
-  state: Path,
+  state: Type,
 }
 
 /// Implements [Context](https://docs.rs/qcontext/latest/qcontext/trait.Context.html)

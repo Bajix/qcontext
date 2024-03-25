@@ -11,7 +11,7 @@ pub use qcell::TCell;
 use qcell::TCellOwner;
 pub use qcontext_derive::Context;
 
-/// Container for [`Context::State`]
+/// Container exclusively for [`Context::State`] and initialized by [`Context::init`]
 pub struct OnceCell<T> {
   inner: UnsafeCell<MaybeUninit<T>>,
 }
@@ -27,7 +27,7 @@ impl<T> OnceCell<T> {
 unsafe impl<T> Send for OnceCell<T> where T: Send {}
 unsafe impl<T> Sync for OnceCell<T> where T: Sync {}
 
-/// Borrow-owner of all [`TCell`] owned by [`Context::State`]
+/// Borrow-owner of all [`TCell<T>`] using [`Context`] as the marker type
 pub struct ContextOwner<T: Context>(ManuallyDrop<TCellOwner<T>>);
 
 impl<C> ContextOwner<C>
@@ -96,7 +96,12 @@ pub trait Context: Sized + 'static {
   }
 }
 
-/// Extension trait for borrowing from [`Context`]
+#[derive(Context)]
+#[context(state = "()")]
+/// A stateless global context that acts as the borrow-owner of all [`TCell<Global, T>`]
+pub struct Global;
+
+/// Extension trait for borrowing from [`Context::State`]
 pub trait ContextExt<T>: Context {
   /// Immutably borrow the contents of a [`TCell`] owned by [`Context`]
   fn get<'a>(owner: &'a ContextOwner<Self>) -> &'a T;
@@ -126,6 +131,15 @@ where
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn global_context_can_mutate() {
+    let counter = TCell::<Global, usize>::new(0);
+    let mut owner = Global::init(());
+
+    *counter.rw(&mut owner) = 9999;
+    assert_eq!(counter.ro(&owner), &9999);
+  }
 
   #[test]
   fn it_creates_static_references() {
