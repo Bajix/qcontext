@@ -27,8 +27,8 @@ pub fn derive_context(input: proc_macro::TokenStream) -> proc_macro::TokenStream
     impl qcontext::Context for #ident {
       type State = #state;
 
-      fn context() -> &'static qcontext::Lazy<Self::State> {
-        static CONTEXT: qcontext::Lazy<#state> = qcontext::Lazy::new();
+      fn context() -> &'static qcontext::OnceCell<Self::State> {
+        static CONTEXT: qcontext::OnceCell<#state> = qcontext::OnceCell::new();
 
         &CONTEXT
       }

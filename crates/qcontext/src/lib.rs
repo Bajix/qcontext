@@ -9,21 +9,21 @@ use std::{
 use qcell::{TCell, TCellOwner};
 pub use qcontext_derive::Context;
 
-/// Container for lazily initializing [`Context::State`]
-pub struct Lazy<T> {
+/// Container for [`Context::State`]
+pub struct OnceCell<T> {
   inner: UnsafeCell<MaybeUninit<T>>,
 }
 
-impl<T> Lazy<T> {
+impl<T> OnceCell<T> {
   pub const fn new() -> Self {
-    Lazy {
+    OnceCell {
       inner: UnsafeCell::new(MaybeUninit::uninit()),
     }
   }
 }
 
-unsafe impl<T> Send for Lazy<T> where T: Send {}
-unsafe impl<T> Sync for Lazy<T> where T: Sync {}
+unsafe impl<T> Send for OnceCell<T> where T: Send {}
+unsafe impl<T> Sync for OnceCell<T> where T: Sync {}
 
 /// Borrow-owner of all [`TCell<T>`]
 pub struct ContextOwner<T: Context>(ManuallyDrop<TCellOwner<T>>);
@@ -63,7 +63,7 @@ pub trait Context: Sized + 'static {
 
   /// Static state whose contents is owned, for borrowing purposes, by the [`ContextOwner`] created
   /// with [`Context::init`]
-  fn context() -> &'static Lazy<Self::State>;
+  fn context() -> &'static OnceCell<Self::State>;
 
   #[allow(unused_variables)]
   fn state(owner: &ContextOwner<Self>) -> &'static Self::State {
