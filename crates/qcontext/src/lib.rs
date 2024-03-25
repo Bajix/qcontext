@@ -103,6 +103,18 @@ mod tests {
   use super::*;
 
   #[test]
+  fn it_creates_static_references() {
+    #[derive(Context)]
+    #[context(state = "usize")]
+    struct Counter;
+
+    let owner = Counter::init(9999);
+    let counter = Counter::state(&owner);
+    drop(owner);
+    assert_eq!(counter, &9999);
+  }
+
+  #[test]
   fn it_initializes_and_mutates() {
     #[derive(Context)]
     #[context(state = "TCell<Counter, usize>")]
