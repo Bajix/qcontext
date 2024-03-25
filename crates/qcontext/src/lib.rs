@@ -30,6 +30,29 @@ unsafe impl<T> Sync for OnceCell<T> where T: Sync {}
 /// Borrow-owner of all [`TCell`] owned by [`Context::State`]
 pub struct ContextOwner<T: Context>(ManuallyDrop<TCellOwner<T>>);
 
+impl<C> ContextOwner<C>
+where
+  C: Context,
+{
+  pub fn state(&self) -> &'static C::State {
+    C::state(self)
+  }
+
+  pub fn get<'a, T>(&'a self) -> &'a T
+  where
+    C::State: Borrow<TCell<C, T>>,
+  {
+    C::get(self)
+  }
+
+  pub fn get_mut<'a, T>(&'a mut self) -> &'a mut T
+  where
+    C::State: Borrow<TCell<C, T>>,
+  {
+    C::get_mut(self)
+  }
+}
+
 impl<T> Deref for ContextOwner<T>
 where
   T: Context,
