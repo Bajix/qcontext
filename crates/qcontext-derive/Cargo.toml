@@ -1,0 +1,23 @@
+[package]
+authors = ["Thomas Sieverding <Thomas@bajix.com>"]
+edition = "2021"
+name = "qcontext-derive"
+version = "0.1.0"
+description = "Derives for qcontext"
+readme = "./README.md"
+license = "MIT"
+repository = "https://github.com/Bajix/qcontext/"
+
+[lib]
+test = false
+doctest = false
+proc-macro = true
+
+[dependencies]
+darling = "0.20"
+quote = "1"
+syn = { version = "2", features = [] }
+
+[package.metadata.docs.rs]
+all-features = false
+rustdoc-args = ["--cfg", "docsrs"]

@@ -21,3 +21,7 @@ Cargo.lock
 
 # Used for Taskfile.yml. See https://taskfile.dev/
 .task
+
+# Added by cargo
+
+/target
