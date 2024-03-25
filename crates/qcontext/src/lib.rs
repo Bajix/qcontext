@@ -6,7 +6,9 @@ use std::{
   ops::{Deref, DerefMut},
 };
 
-use qcell::{TCell, TCellOwner};
+#[doc(no_inline)]
+pub use qcell::TCell;
+use qcell::TCellOwner;
 pub use qcontext_derive::Context;
 
 /// Container for [`Context::State`]
@@ -25,7 +27,7 @@ impl<T> OnceCell<T> {
 unsafe impl<T> Send for OnceCell<T> where T: Send {}
 unsafe impl<T> Sync for OnceCell<T> where T: Sync {}
 
-/// Borrow-owner of all [`TCell<T>`]
+/// Borrow-owner of all [`TCell`] owned by [`Context::State`]
 pub struct ContextOwner<T: Context>(ManuallyDrop<TCellOwner<T>>);
 
 impl<T> Deref for ContextOwner<T>
