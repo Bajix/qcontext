@@ -27,7 +27,7 @@ impl<T> OnceCell<T> {
 unsafe impl<T> Send for OnceCell<T> where T: Send {}
 unsafe impl<T> Sync for OnceCell<T> where T: Sync {}
 
-/// Borrow-owner of all [`TCell<T>`] using [`Context`] as the marker type
+/// Borrow-owner of all [`TCell<T>`] using the marker type `T`
 pub struct ContextOwner<T: Context>(ManuallyDrop<TCellOwner<T>>);
 
 impl<C> ContextOwner<C>
@@ -80,9 +80,7 @@ pub trait Context: Sized + 'static {
   /// can only ever be called once per process and will panic otherwise
   fn init(state: Self::State) -> ContextOwner<Self> {
     let owner = ContextOwner(ManuallyDrop::new(TCellOwner::new()));
-
     unsafe { (&mut *Self::context().inner.get()).write(state) };
-
     owner
   }
 
@@ -92,13 +90,14 @@ pub trait Context: Sized + 'static {
 
   #[allow(unused_variables)]
   fn state(owner: &ContextOwner<Self>) -> &'static Self::State {
+    // By virtue of ContextOwner existing, it can be known that this has already been initialized and will never be invalidated
     unsafe { (&*Self::context().inner.get()).assume_init_ref() }
   }
 }
 
 #[derive(Context)]
 #[context(state = "()")]
-/// A stateless global context that acts as the borrow-owner of all [`TCell<Global, T>`]
+/// A stateless global context that establishes a single borrow-owner over all [`TCell<Global, T>`]
 pub struct Global;
 
 /// Extension trait for borrowing from [`Context::State`]
