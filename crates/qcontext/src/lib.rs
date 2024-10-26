@@ -1,3 +1,5 @@
+#![allow(clippy::new_without_default)]
+
 extern crate self as qcontext;
 use std::{
   borrow::Borrow,
@@ -38,14 +40,14 @@ where
     C::state(self)
   }
 
-  pub fn get<'a, T>(&'a self) -> &'a T
+  pub fn get<T>(&self) -> &T
   where
     C::State: Borrow<TCell<C, T>>,
   {
     C::get(self)
   }
 
-  pub fn get_mut<'a, T>(&'a mut self) -> &'a mut T
+  pub fn get_mut<T>(&mut self) -> &mut T
   where
     C::State: Borrow<TCell<C, T>>,
   {
@@ -80,7 +82,7 @@ pub trait Context: Sized + 'static {
   /// can only ever be called once per process and will panic otherwise
   fn init(state: Self::State) -> ContextOwner<Self> {
     let owner = ContextOwner(ManuallyDrop::new(TCellOwner::new()));
-    unsafe { (&mut *Self::context().inner.get()).write(state) };
+    unsafe { (*Self::context().inner.get()).write(state) };
     owner
   }
 
@@ -90,8 +92,9 @@ pub trait Context: Sized + 'static {
 
   #[allow(unused_variables)]
   fn state(owner: &ContextOwner<Self>) -> &'static Self::State {
-    // By virtue of ContextOwner existing, it can be known that this has already been initialized and will never be invalidated
-    unsafe { (&*Self::context().inner.get()).assume_init_ref() }
+    // By virtue of ContextOwner existing, it can be known that this has already been initialized
+    // and will never be invalidated
+    unsafe { (*Self::context().inner.get()).assume_init_ref() }
   }
 }
 
@@ -103,10 +106,10 @@ pub struct Global;
 /// Extension trait for borrowing from [`Context::State`]
 pub trait ContextExt<T>: Context {
   /// Immutably borrow the contents of a [`TCell`] owned by [`Context`]
-  fn get<'a>(owner: &'a ContextOwner<Self>) -> &'a T;
+  fn get(owner: &ContextOwner<Self>) -> &T;
 
   /// Mutably borrow the contents of a [`TCell`] owned by [`Context`]
-  fn get_mut<'a>(owner: &'a mut ContextOwner<Self>) -> &'a mut T;
+  fn get_mut(owner: &mut ContextOwner<Self>) -> &mut T;
 }
 
 impl<T, C> ContextExt<T> for C
@@ -115,13 +118,13 @@ where
   C::State: Borrow<TCell<C, T>>,
 {
   fn get<'a>(owner: &'a ContextOwner<C>) -> &'a T {
-    let state = unsafe { (&*C::context().inner.get()).assume_init_ref() };
+    let state = unsafe { (*C::context().inner.get()).assume_init_ref() };
     let cell: &'a TCell<C, T> = state.borrow();
-    cell.ro(&owner)
+    cell.ro(owner)
   }
 
   fn get_mut<'a>(owner: &'a mut ContextOwner<C>) -> &'a mut T {
-    let state = unsafe { (&*C::context().inner.get()).assume_init_ref() };
+    let state = unsafe { (*C::context().inner.get()).assume_init_ref() };
     let cell: &'a TCell<C, T> = state.borrow();
     cell.rw(owner)
   }
