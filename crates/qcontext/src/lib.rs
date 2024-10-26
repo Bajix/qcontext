@@ -1,7 +1,10 @@
+#![no_std]
 #![allow(clippy::new_without_default)]
 
+extern crate core;
 extern crate self as qcontext;
-use std::{
+
+use core::{
   borrow::Borrow,
   cell::UnsafeCell,
   mem::{ManuallyDrop, MaybeUninit},
